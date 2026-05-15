@@ -1,184 +1,133 @@
-require('dotenv').config();
+require("dotenv").config();
 
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
 const {
-  Client,
-  Collection,
-  GatewayIntentBits,
-  Events
-} = require('discord.js');
+    Client,
+    Collection,
+    GatewayIntentBits,
+    Partials
+} = require("discord.js");
 
 const client = new Client({
-
-  intents: [
-
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.GuildModeration,
-    GatewayIntentBits.GuildWebhooks
-
-  ]
-
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildVoiceStates,
+    ],
+    partials: [Partials.Channel]
 });
 
 client.commands = new Collection();
 
-/*
-=========================
-BOT PREFIX
-=========================
-*/
+const commands = [];
 
-client.prefix = 'R';
-
-/*
-=========================
-COMMAND LOADER
-=========================
-*/
-
-const commandsPath =
-  path.join(__dirname, 'commands');
-
-const commandFiles =
-  fs.readdirSync(commandsPath)
-    .filter(file => file.endsWith('.js'));
+// Load Commands
+const commandsPath = path.join(__dirname, "commands");
+const commandFiles = fs
+    .readdirSync(commandsPath)
+    .filter(file => file.endsWith(".js"));
 
 for (const file of commandFiles) {
+    const filePath = path.join(commandsPath, file);
 
-  const filePath =
-    path.join(commandsPath, file);
+    try {
+        const command = require(filePath);
 
-  const command =
-    require(filePath);
+        // Skip broken command files
+        if (!command) continue;
 
-  client.commands.set(
-    command.data.name,
-    command
-  );
+        // Support both slash + prefix commands
+        const commandName =
+            command.data?.name || command.name;
 
-}
+        if (!commandName) {
+            console.log(`❌ Invalid command file: ${file}`);
+            continue;
+        }
 
-/*
-=========================
-EVENT LOADER
-=========================
-*/
+        client.commands.set(commandName, command);
 
-const eventsPath =
-  path.join(__dirname, 'events');
+        // Only push slash commands
+        if (command.data) {
+            commands.push(command.data.toJSON());
+        }
 
-const eventFiles =
-  fs.readdirSync(eventsPath)
-    .filter(file => file.endsWith('.js'));
+        console.log(`✅ Loaded command: ${commandName}`);
 
-for (const file of eventFiles) {
-
-  const filePath =
-    path.join(eventsPath, file);
-
-  const event =
-    require(filePath);
-
-  client.on(
-    event.name,
-    async (...args) => {
-
-      try {
-
-        await event.execute(...args);
-
-      } catch (error) {
-
-        console.error(
-          `Error in event ${event.name}:`,
-          error
-        );
-
-      }
-
+    } catch (err) {
+        console.log(`❌ Failed to load ${file}`);
+        console.error(err);
     }
-  );
-
 }
 
-/*
-=========================
-BOT READY
-=========================
-*/
-
-client.once(Events.ClientReady, c => {
-
-  console.log(
-    `✅ ${c.user.tag} is online`
-  );
-
-  client.user.setPresence({
-
-    activities: [
-
-      {
-
-        name:
-          `Crafted by parth.cd || ${client.prefix}help`,
-
-        type: 0
-
-      }
-
-    ],
-
-    status: 'online'
-
-  });
-
+// Ready Event
+client.once("ready", () => {
+    console.log(`🤖 Logged in as ${client.user.tag}`);
 });
 
-/*
-=========================
-SLASH COMMAND HANDLER
-=========================
-*/
+// Message Commands
+client.on("messageCreate", async message => {
+    if (message.author.bot) return;
 
-client.on(
-  Events.InteractionCreate,
-  async interaction => {
+    const prefix = "!";
 
-    if (!interaction.isChatInputCommand())
-      return;
+    if (!message.content.startsWith(prefix)) return;
 
-    const command =
-      client.commands.get(
-        interaction.commandName
-      );
+    const args = message.content
+        .slice(prefix.length)
+        .trim()
+        .split(/ +/);
+
+    const commandName = args.shift().toLowerCase();
+
+    const command = client.commands.get(commandName);
 
     if (!command) return;
 
     try {
-
-      await command.execute(interaction);
-
+        if (command.execute) {
+            command.execute(message, args, client);
+        }
     } catch (error) {
-
-      console.error(error);
-
-      await interaction.reply({
-
-        content:
-          '❌ Error while executing command.',
-
-        ephemeral: true
-
-      });
-
+        console.error(error);
+        message.reply("❌ Error executing command.");
     }
+});
 
-  }
-);
+// Slash Commands
+client.on("interactionCreate", async interaction => {
+    if (!interaction.isChatInputCommand()) return;
 
+    const command = client.commands.get(
+        interaction.commandName
+    );
+
+    if (!command) return;
+
+    try {
+        if (command.execute) {
+            await command.execute(interaction, client);
+        }
+    } catch (error) {
+        console.error(error);
+
+        if (interaction.replied || interaction.deferred) {
+            await interaction.followUp({
+                content: "❌ Error executing slash command.",
+                ephemeral: true
+            });
+        } else {
+            await interaction.reply({
+                content: "❌ Error executing slash command.",
+                ephemeral: true
+            });
+        }
+    }
+});
+
+// Login
 client.login(process.env.TOKEN);
