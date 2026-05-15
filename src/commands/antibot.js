@@ -5,7 +5,7 @@ const {
 } = require('discord.js');
 
 const db =
-  require('../database/database');
+  require('../Database/database');
 
 module.exports = {
 
