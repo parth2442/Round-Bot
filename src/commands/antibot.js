@@ -4,8 +4,7 @@ const {
   PermissionFlagsBits
 } = require('discord.js');
 
-const db =
-  require('../Database/database');
+const db = require('../Database/database');
 
 module.exports = {
 
@@ -13,9 +12,7 @@ module.exports = {
 
     .setName('antibot')
 
-    .setDescription(
-      'Manage antibot system'
-    )
+    .setDescription('Manage antibot system')
 
     .addSubcommand(subcommand =>
 
@@ -23,9 +20,7 @@ module.exports = {
 
         .setName('enable')
 
-        .setDescription(
-          'Enable antibot'
-        )
+        .setDescription('Enable antibot')
 
     )
 
@@ -35,9 +30,7 @@ module.exports = {
 
         .setName('disable')
 
-        .setDescription(
-          'Disable antibot'
-        )
+        .setDescription('Disable antibot')
 
     )
 
@@ -47,9 +40,7 @@ module.exports = {
 
         .setName('add')
 
-        .setDescription(
-          'Whitelist user'
-        )
+        .setDescription('Whitelist user')
 
         .addUserOption(option =>
 
@@ -57,9 +48,7 @@ module.exports = {
 
             .setName('user')
 
-            .setDescription(
-              'User to whitelist'
-            )
+            .setDescription('User to whitelist')
 
             .setRequired(true)
 
@@ -73,9 +62,7 @@ module.exports = {
 
         .setName('remove')
 
-        .setDescription(
-          'Remove whitelist user'
-        )
+        .setDescription('Remove whitelist user')
 
         .addUserOption(option =>
 
@@ -83,9 +70,7 @@ module.exports = {
 
             .setName('user')
 
-            .setDescription(
-              'User to remove'
-            )
+            .setDescription('User to remove')
 
             .setRequired(true)
 
@@ -99,9 +84,7 @@ module.exports = {
 
         .setName('wl')
 
-        .setDescription(
-          'Show whitelist'
-        )
+        .setDescription('Show whitelist')
 
     )
 
@@ -135,9 +118,7 @@ module.exports = {
 
             .setColor('#00ff99')
 
-            .setTitle(
-              '🛡 Antibot Enabled'
-            )
+            .setTitle('🛡 Antibot Enabled')
 
             .setDescription(
               'Round Bot antibot protection enabled.'
@@ -170,9 +151,7 @@ module.exports = {
 
             .setColor('#ff0000')
 
-            .setTitle(
-              '❌ Antibot Disabled'
-            )
+            .setTitle('❌ Antibot Disabled')
 
             .setDescription(
               'Round Bot antibot protection disabled.'
@@ -193,9 +172,7 @@ module.exports = {
     if (sub === 'add') {
 
       const user =
-        interaction.options.getUser(
-          'user'
-        );
+        interaction.options.getUser('user');
 
       await db.set(
 
@@ -213,9 +190,7 @@ module.exports = {
 
             .setColor('#00d5ff')
 
-            .setTitle(
-              '✅ User Whitelisted'
-            )
+            .setTitle('✅ User Whitelisted')
 
             .setDescription(
               `${user} added to antibot whitelist.`
@@ -236,9 +211,7 @@ module.exports = {
     if (sub === 'remove') {
 
       const user =
-        interaction.options.getUser(
-          'user'
-        );
+        interaction.options.getUser('user');
 
       await db.delete(
 
@@ -254,9 +227,7 @@ module.exports = {
 
             .setColor('#ff0000')
 
-            .setTitle(
-              '❌ User Removed'
-            )
+            .setTitle('❌ User Removed')
 
             .setDescription(
               `${user} removed from antibot whitelist.`
@@ -321,9 +292,7 @@ module.exports = {
 
             .setColor('#00d5ff')
 
-            .setTitle(
-              '📜 Antibot Whitelist'
-            )
+            .setTitle('📜 Antibot Whitelist')
 
             .setDescription(
               users.join('\n')
@@ -375,9 +344,7 @@ module.exports = {
 
             .setColor('#00ff99')
 
-            .setTitle(
-              '🛡 Antibot Enabled'
-            )
+            .setTitle('🛡 Antibot Enabled')
 
         ]
 
@@ -406,9 +373,7 @@ module.exports = {
 
             .setColor('#ff0000')
 
-            .setTitle(
-              '❌ Antibot Disabled'
-            )
+            .setTitle('❌ Antibot Disabled')
 
         ]
 
@@ -448,9 +413,7 @@ module.exports = {
 
             .setColor('#00d5ff')
 
-            .setTitle(
-              '✅ User Whitelisted'
-            )
+            .setTitle('✅ User Whitelisted')
 
             .setDescription(
               `${user} added to antibot whitelist.`
@@ -492,9 +455,7 @@ module.exports = {
 
             .setColor('#ff0000')
 
-            .setTitle(
-              '❌ User Removed'
-            )
+            .setTitle('❌ User Removed')
 
             .setDescription(
               `${user} removed from antibot whitelist.`
@@ -554,9 +515,7 @@ module.exports = {
 
             .setColor('#00d5ff')
 
-            .setTitle(
-              '📜 Antibot Whitelist'
-            )
+            .setTitle('📜 Antibot Whitelist')
 
             .setDescription(
               users.join('\n')
